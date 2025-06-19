@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Home | SkyCast{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: url('https://www.transparenttextures.com/patterns/connected.png'), linear-gradient(to top, #0f2027, #203a43, #2c5364);
+        background-size: cover;
+        color: white;
+        min-height: 100vh;
+    }
+
+    .hero {
+        padding: 4rem 1rem;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .weather-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+        color: white;
+        text-align: center;
+    }
+
+    .weather-card img {
+        width: 60px;
+    }
+
+    .forecast {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .forecast-day {
+        flex: 1 1 100px;
+        margin: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="hero">
+    <h1>Real-Time Weather Info</h1>
+    <p class="lead">Search any city and get the latest weather data</p>
+
+    <form id="weatherForm" class="d-flex gap-2 justify-content-center my-4">
+        <input type="text" id="cityInput" class="form-control w-25" placeholder="Enter city (e.g., Delhi)" required>
+        <button type="submit" class="btn btn-warning">Search</button>
+    </form>
+
+    <div id="weatherResult"></div>
+</div>
+
+<script>
+document.getElementById('weatherForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const city = document.getElementById('cityInput').value.trim();
+    const resultDiv = document.getElementById('weatherResult');
+
+    if (!city) {
+        resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a city name.</div>';
+        return;
+    }
+
+    resultDiv.innerHTML = '<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>';
+
+    // 🔧 Use full URL instead of relative (for development)
+    fetch(`http://127.0.0.1:8000/api/weather/?city=${encodeURIComponent(city)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error || data.success === false) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">${data?.error || data?.info || 'Error fetching weather data.'}</div>`;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="weather-card mx-auto mt-4 w-50">
+                        <h3>${data.city}, ${data.country}</h3>
+                        <img src="${data.icon}" alt="Weather Icon" class="my-2"/>
+                        <p><strong>${data.description}</strong></p>
+                        <p><strong>Temperature:</strong> ${data.temperature} °C</p>
+                        <p><strong>Feels Like:</strong> ${data.feelslike} °C</p>
+                        <p><strong>Humidity:</strong> ${data.humidity}% | <strong>Wind:</strong> ${data.wind_speed} km/h</p>
+                        <div class="forecast">
+                            <div class="forecast-day">🌤️ Fri<br>22°C</div>
+                            <div class="forecast-day">🌤️ Sat<br>23°C</div>
+                            <div class="forecast-day">🌤️ Sun<br>25°C</div>
+                            <div class="forecast-day">🌤️ Mon<br>26°C</div>
+                            <div class="forecast-day">🌤️ Tue<br>24°C</div>
+                        </div>
+                    </div>
+                `;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            resultDiv.innerHTML = '<div class="alert alert-danger">Failed to fetch weather data. Please try again later.</div>';
+        });
+});
+</script>
+{% endblock %}
