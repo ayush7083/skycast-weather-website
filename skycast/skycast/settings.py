@@ -1,19 +1,19 @@
 from pathlib import Path
 import os
-import dj_database_url  # Enables PostgreSQL support via DATABASE_URL
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ✅ Secret Key from environment (fallback is unsafe for production)
+# ✅ Secure secret key from environment
 SECRET_KEY = os.environ.get('SECRET_KEY', 'unsafe-secret-key-for-dev-only')
 
-# ✅ Debug mode from environment (default False for production)
+# ✅ Toggle DEBUG from env (default False)
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-# ✅ Allowed hosts from environment (comma-separated)
+# ✅ Allow Render host + localhost for dev
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
-# ✅ Installed applications
+# ✅ Installed Django + 3rd party + local apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
+# ✅ Essential middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -39,6 +40,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'skycast.urls'
 
+# ✅ Templates configuration
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -59,10 +61,11 @@ TEMPLATES = [
     },
 ]
 
-# ✅ ASGI and WSGI for both HTTP and WebSocket
+# ✅ For HTTP and WebSocket support
 WSGI_APPLICATION = 'skycast.wsgi.application'
 ASGI_APPLICATION = 'skycast.asgi.application'
 
+# ✅ Channels + Redis config (no SSL for Render)
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -70,14 +73,13 @@ CHANNEL_LAYERS = {
             "hosts": [{
                 "address": (os.environ.get('REDIS_HOST', '127.0.0.1'), 6379),
                 "password": os.environ.get('REDIS_PASSWORD', ''),
-                "ssl": True,
+                "ssl": False,  # ⛔ SSL breaks on free Render Redis
             }],
         },
     },
 }
 
-
-# ✅ PostgreSQL via DATABASE_URL or fallback to SQLite
+# ✅ PostgreSQL on Render, SQLite fallback for local
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
@@ -95,6 +97,7 @@ else:
         }
     }
 
+# ✅ Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -102,25 +105,25 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# ✅ Localization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# ✅ Static files (important for Render)
+# ✅ Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ For collectstatic (optional, can be set in environment too)
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ✅ Weather API key
+# ✅ API Key
 WEATHERSTACK_API_KEY = os.environ.get("WEATHERSTACK_API_KEY", "")
 
-# ✅ Authentication redirects
+# ✅ Auth redirect
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = '/register/'
