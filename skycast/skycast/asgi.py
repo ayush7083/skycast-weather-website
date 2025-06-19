@@ -11,6 +11,8 @@ import os
 import django
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
+from skycast.weather import routing
+
 
 from weather.routing import websocket_urlpatterns  # ✅ Make sure this works
 
